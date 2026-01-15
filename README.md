@@ -1,17 +1,25 @@
-# React + Vite
+# 🚗 WashControl v2.0
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema profesional de gestión para control de lavados de flota construido con **React**, **Firebase** y **Tailwind CSS**.
 
-Currently, two official plugins are available:
+## ✨ Características
+- 📝 **Registro rápido:** Formulario optimizado con validación de patentes.
+- 🔍 **Buscador inteligente:** Filtrado por patente o marca en tiempo real.
+- 📊 **Dashboard:** Estadísticas diarias de servicios realizados.
+- 🔔 **Interacciones:** Notificaciones visuales (Toasts) y sonidos de éxito/eliminación.
+- 📱 **Responsive:** Diseño adaptable a tablets y móviles.
+- 🔒 **Seguridad:** Configuración protegida mediante variables de entorno.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tecnologías
+- **React + Vite**
+- **Firebase Firestore** (Base de datos en tiempo real)
+- **Tailwind CSS** (Estilos)
+- **Framer Motion** (Animaciones)
+- **Lucide React** (Iconografía)
+- **SweetAlert2** (Alertas)
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# Control-de-lavados
+## 🚀 Instalación
+1. Clonar el repo: `git clone https://github.com/tu-usuario/gestor-lavado-react.git`
+2. Instalar dependencias: `npm install`
+3. Crear un archivo `.env` con tus credenciales de Firebase.
+4. Iniciar: `npm run dev`
