@@ -1,46 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase.config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Phone, Gauge, PlusCircle, Calendar } from 'lucide-react';
+
+import { PlusCircle, Car, Hash, Phone, Calendar, Gauge, Activity } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-const Formulario = ({ onSave }) => { // RECIBE FUNCION DE SONIDO
-  const [formData, setFormData] = useState({ patente: '', marca: '', modelo: '', anio: '', km: '', telefono: '', fecha: new Date().toISOString().split('T')[0] });
+const Formulario = ({ onSave }) => {
+  const [formData, setFormData] = useState(() => {
+    const borrador = localStorage.getItem('borrador_lavado');
+    return borrador ? JSON.parse(borrador) : {
+      patente: '', marca: '', modelo: '', anio: '', km: '', telefono: ''
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('borrador_lavado', JSON.stringify(formData));
+  }, [formData]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value.toUpperCase() });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading() });
+    if (!formData.patente || !formData.marca) {
+      Swal.fire('Error', 'Patente y Marca son obligatorios', 'error');
+      return;
+    }
+
     try {
-      await addDoc(collection(db, "lavados"), { 
-        ...formData, 
-        patente: formData.patente.toUpperCase(), 
-        km: Number(formData.km), 
-        estado: "Pendiente",
-        createdAt: serverTimestamp() 
+      await addDoc(collection(db, "lavados"), {
+        ...formData,
+        fecha: new Date().toISOString().split('T')[0],
+        estado: 'Pendiente',
+        createdAt: serverTimestamp()
       });
-      if (onSave) onSave(); // DISPARA SONIDO EXITOSO
-      Swal.fire({ icon: 'success', title: 'REGISTRADO', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-[2rem]' }});
-      setFormData({ patente: '', marca: '', modelo: '', anio: '', km: '', telefono: '', fecha: new Date().toISOString().split('T')[0] });
-    } catch (err) { Swal.fire('Error', 'No se pudo guardar', 'error'); }
+
+      const limpio = { patente: '', marca: '', modelo: '', anio: '', km: '', telefono: '' };
+      setFormData(limpio);
+      localStorage.removeItem('borrador_lavado');
+      onSave();
+      Swal.fire({ icon: 'success', title: '¡Vehículo Registrado!', showConfirmButton: false, timer: 1500 });
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo conectar con Firebase', 'error');
+    }
   };
 
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
-      <h2 className="text-xl font-black mb-6 flex items-center gap-2 uppercase tracking-tighter"><PlusCircle className="text-blue-600" /> Nuevo Ingreso</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input required placeholder="PATENTE" className="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold uppercase outline-none focus:ring-2 focus:ring-blue-500" value={formData.patente} onChange={e => setFormData({...formData, patente: e.target.value})} />
-        <div className="grid grid-cols-2 gap-4">
-          <input required placeholder="Marca" className="p-4 bg-slate-50 rounded-2xl border-none font-semibold outline-none" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} />
-          <input required placeholder="Modelo" className="p-4 bg-slate-50 rounded-2xl border-none font-semibold outline-none" value={formData.modelo} onChange={e => setFormData({...formData, modelo: e.target.value})} />
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-4">
+      <h2 className="font-black text-slate-800 uppercase text-[10px] tracking-[0.15em] flex items-center gap-2 mb-6">
+        <div className="bg-blue-600 p-1.5 rounded-lg">
+          <PlusCircle size={14} className="text-white" />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="relative"><Calendar className="absolute left-4 top-4 text-slate-400" size={16} /><input type="number" placeholder="Año" className="w-full pl-10 p-4 bg-slate-50 rounded-2xl border-none font-semibold outline-none" value={formData.anio} onChange={e => setFormData({...formData, anio: e.target.value})} /></div>
-          <div className="relative"><Gauge className="absolute left-4 top-4 text-blue-500" size={16} /><input required type="number" placeholder="KM" className="w-full pl-10 p-4 bg-slate-100 rounded-2xl border-none font-bold text-blue-600 outline-none" value={formData.km} onChange={e => setFormData({...formData, km: e.target.value})} /></div>
+        Nuevo Ingreso
+      </h2>
+      
+      <div className="grid grid-cols-2 gap-3">
+        <div className="relative">
+          <Hash className="absolute left-4 top-3.5 text-slate-400" size={14} />
+          <input name="patente" placeholder="PATENTE" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.patente} onChange={handleChange} />
         </div>
-        <div className="relative"><Phone className="absolute left-4 top-4 text-slate-400" size={18} /><input required placeholder="WhatsApp" className="w-full pl-12 p-4 bg-slate-50 rounded-2xl border-none font-semibold outline-none" value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} /></div>
-        <button type="submit" className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase shadow-lg hover:bg-blue-700 transition-all">Registrar Lavado</button>
-      </form>
-    </div>
+        <div className="relative">
+          <Car className="absolute left-4 top-3.5 text-slate-400" size={14} />
+          <input name="marca" placeholder="MARCA" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.marca} onChange={handleChange} />
+        </div>
+      </div>
+
+      <div className="relative">
+        <Activity className="absolute left-4 top-3.5 text-slate-400" size={14} />
+        <input name="modelo" placeholder="MODELO (EJ: RANGER, HILUX...)" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.modelo} onChange={handleChange} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="relative">
+          <Calendar className="absolute left-4 top-3.5 text-slate-400" size={14} />
+          <input name="anio" type="number" placeholder="AÑO" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.anio} onChange={handleChange} />
+        </div>
+        <div className="relative">
+          <Gauge className="absolute left-4 top-3.5 text-slate-400" size={14} />
+          <input name="km" type="number" placeholder="KM" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.km} onChange={handleChange} />
+        </div>
+      </div>
+
+      <div className="relative">
+        <Phone className="absolute left-4 top-3.5 text-slate-400" size={14} />
+        <input name="telefono" placeholder="WHATSAPP (EJ: 1122334455)" className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all" value={formData.telefono} onChange={handleChange} />
+      </div>
+
+      <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 active:scale-95">
+        Registrar Vehículo
+      </button>
+    </form>
   );
 };
+
 export default Formulario;
