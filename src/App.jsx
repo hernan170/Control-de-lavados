@@ -23,13 +23,21 @@ function App() {
   
   const [busqueda, setBusqueda] = useState('');
   const [horaActual, setHoraActual] = useState(new Date().toLocaleTimeString());
-  const [isLoaded, setIsLoaded] = useState(false); // Control de montaje
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Configuración de Notificaciones Toast
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+  });
 
   useEffect(() => {
-    // Retrasamos ligeramente el montaje del gráfico para que el DOM esté listo
     const timeout = setTimeout(() => setIsLoaded(true), 500);
-    
     const timer = setInterval(() => setHoraActual(new Date().toLocaleTimeString()), 1000);
+    
     const q = query(collection(db, "lavados"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const datosFirebase = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -45,9 +53,15 @@ function App() {
     audio.play().catch(() => {});
   };
 
+  // Cálculo de días sincronizado con la fecha actual
   const calcularDias = (fecha) => {
     if (!fecha) return 0;
-    return Math.floor((new Date() - new Date(fecha + "T12:00:00")) / (1000 * 60 * 60 * 24));
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fechaLavado = new Date(fecha + "T12:00:00");
+    fechaLavado.setHours(0, 0, 0, 0);
+    const diferencia = hoy - fechaLavado;
+    return Math.floor(diferencia / (1000 * 60 * 60 * 24));
   };
 
   const obtenerDatosGrafico = () => {
@@ -109,14 +123,16 @@ function App() {
 
       <main className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
         <div className="lg:col-span-4 space-y-6">
-          <Formulario onSave={() => playSound('success')} />
+          <Formulario onSave={() => {
+            playSound('success');
+            Toast.fire({ icon: 'success', title: 'Vehículo Registrado' });
+          }} />
           
           <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
             <h3 className="font-black text-slate-800 mb-6 uppercase text-[10px] tracking-widest flex items-center gap-2">
               <BarChart3 size={14} className="text-blue-600" /> Actividad Semanal
             </h3>
             
-            {/* CONTENEDOR CON TAMAÑO MÍNIMO EXPLÍCITO */}
             <div className="w-full min-h-[180px] flex items-center justify-center"> 
               {isLoaded ? (
                 <ResponsiveContainer width="100%" height={180}>
@@ -145,11 +161,19 @@ function App() {
               calcularDias={calcularDias} 
               onEliminar={async (id) => {
                 const res = await Swal.fire({ title: '¿ELIMINAR?', icon: 'warning', showCancelButton: true });
-                if (res.isConfirmed) await deleteDoc(doc(db, "lavados", id));
+                if (res.isConfirmed) {
+                  await deleteDoc(doc(db, "lavados", id));
+                  Toast.fire({ icon: 'success', title: 'Eliminado' });
+                }
               }} 
               onCambiarEstado={async (id, st) => {
                 await updateDoc(doc(db, "lavados", id), { estado: st });
-                if (st === 'Terminado') playSound('done');
+                if (st === 'Terminado') {
+                  playSound('done');
+                  Toast.fire({ icon: 'success', title: 'Lavado Terminado' });
+                } else {
+                  Toast.fire({ icon: 'info', title: `Estado: ${st}` });
+                }
               }} 
             />
           </div>
@@ -163,7 +187,7 @@ function App() {
         </div>
         <div className="flex items-center gap-4">
           <Clock size={12} /> {horaActual}
-          <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">v 3.7</span>
+          <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">v 3.8</span>
         </div>
       </footer>
     </div>

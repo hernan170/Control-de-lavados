@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase.config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
 import { PlusCircle, Car, Hash, Phone, Calendar, Gauge, Activity } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -29,9 +28,15 @@ const Formulario = ({ onSave }) => {
     }
 
     try {
+      const ahora = new Date();
+      const año = ahora.getFullYear();
+      const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+      const dia = String(ahora.getDate()).padStart(2, '0');
+      const fechaLocal = `${año}-${mes}-${dia}`;
+
       await addDoc(collection(db, "lavados"), {
         ...formData,
-        fecha: new Date().toISOString().split('T')[0],
+        fecha: fechaLocal,
         estado: 'Pendiente',
         createdAt: serverTimestamp()
       });
