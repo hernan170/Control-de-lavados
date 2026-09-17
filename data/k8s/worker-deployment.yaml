@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-worker-deployment
+  labels:
+    app: python-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-worker
+  template:
+    metadata:
+      labels:
+        app: python-worker
+    spec:
+      containers:
+      - name: python-worker
+        image: backend-data-pipeline-sr-python-worker:latest
+        imagePullPolicy: Never
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/app/credentials/credentials.json"
+        volumeMounts:
+        - name: gcp-creds-volume
+          mountPath: /app/credentials
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: gcp-creds-volume
+        secret:
+          secretName: gcp-credentials
