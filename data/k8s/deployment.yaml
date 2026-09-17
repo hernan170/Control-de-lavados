@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-backend-deployment
+  labels:
+    app: api-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-backend
+  template:
+    metadata:
+      labels:
+        app: api-backend
+    spec:
+      containers:
+      - name: api-backend
+        image: backend-data-pipeline-sr-api-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: python-worker-deployment
+labels:
+app: python-worker
+spec:
+replicas: 1
+selector:
+matchLabels:
+app: python-worker
+template:
+metadata:
+labels:
+app: python-worker
+spec:
+containers:
+- name: python-worker
+image: backend-data-pipeline-sr-python-worker:latest
+imagePullPolicy: Never
+env:
+- name: GOOGLE_APPLICATION_CREDENTIALS
+value: "/app/credentials/credentials.json"
+volumeMounts:
+- name: gcp-creds-volume
+mountPath: /app/credentials
+readOnly: true
+resources:
+requests:
+memory: "256Mi"
+cpu: "250m"
+limits:
+memory: "512Mi"
+cpu: "500m"
+volumes:
+- name: gcp-creds-volume
+secret:
+secretName: gcp-credentials

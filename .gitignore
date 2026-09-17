@@ -1,3 +1,23 @@
+<<<<<<< HEAD
+# Dependencias
+node_modules/
+dist/
+build/
+.venv/
+__pycache__/
+
+# Credenciales y variables de entorno
+*.json
+!apps/analytics-dashboard/package.json
+!services/api/package.json
+.env
+.env.local
+
+# IDEs y SO
+.vscode/
+.idea/
+.DS_Store
+=======
 # Logs
 logs
 *.log
@@ -24,3 +44,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+>>>>>>> origin/main

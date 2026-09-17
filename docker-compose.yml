@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # API Backend Node.js
+  api:
+    build:
+      context: ./services/api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GCP_PROJECT_ID=taller-506901
+      - BIGQUERY_DATASET=washcontrol_analytics
+    volumes:
+      - ./services/api:/app
+      - /app/node_modules
+
+  # Frontend React (Dashboard Pareto RCA)
+  analytics-dashboard:
+    build:
+      context: ./apps/analytics-dashboard
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    depends_on:
+      - api

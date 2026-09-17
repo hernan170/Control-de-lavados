@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-backend-deployment
+  labels:
+    app: api-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-backend
+  template:
+    metadata:
+      labels:
+        app: api-backend
+    spec:
+      containers:
+      - name: api-backend
+        image: backend-data-pipeline-sr-api-backend:v4
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /app/credentials/credentials.json
+        volumeMounts:
+        - name: google-creds
+          mountPath: /app/credentials
+          readOnly: true
+      volumes:
+      - name: google-creds
+        secret:
+          secretName: gcp-credentials
