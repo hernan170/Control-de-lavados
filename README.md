@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🧼 WashControl Platform & Analytics Engine
 
 Plataforma integral de gestión operativa y motor de analítica multicanal para **WashControl**. Esta arquitectura utiliza un modelo de **Monorepo Modular** desacoplado, alimentando tres capas de visualización diferenciadas (Operativa, Ejecutiva y Control de Calidad) desde un único Data Warehouse centralizado en Google Cloud Platform.
@@ -7,7 +6,9 @@ Plataforma integral de gestión operativa y motor de analítica multicanal para 
 
 ## 🏛️ Arquitectura del Sistema
 
+
 ```text
+
                         [ FUENTES DE DATOS ]
                  Sistemas Operativos / Tickets / Lavados
                                 │
@@ -22,7 +23,10 @@ Plataforma integral de gestión operativa y motor de analítica multicanal para 
   [ REACT / NODE ]       [ LOOKER STUDIO ]        [ POWER BI ]
  Dashboard Operativo     Dashboard Ejecutivo   Control Estadístico
     (Pareto/RCA)            (NPS & Canales)       (Media, Mediana, Varianza)
+
+
 📁 Estructura del Monorepo
+
 Plaintext
 washcontrol/
 ├── apps/
@@ -35,6 +39,8 @@ washcontrol/
 │   └── k8s/                   # Manifiestos de despliegue para Kubernetes
 ├── docker-compose.yml         # Orquestación de contenedores locales
 └── README.md                  # Documentación general de arquitectura
+
+
 🚀 Inicio Rápido (Entorno Local)
 Requisitos
 Node.js v18+ / npm
@@ -107,6 +113,7 @@ Este proyecto se apoya en un ecosistema robusto de herramientas de desarrollo:
 
 
 ```text
+
 wash-control/
 ├── node_modules/         # Dependencias instaladas vía npm
 ├── src/
